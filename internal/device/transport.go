@@ -22,7 +22,21 @@ func MakeHTTPHandler(ds DeviceService) http.Handler {
 		encodeResponse,
 	))
 
+	r.Methods("POST").Path("/api/auth").Handler(httptransport.NewServer(
+		MakeAuthenticateEndpoint(ds),
+		decodeRegisterTokenRequest,
+		encodeResponse,
+	))
+
 	return r
+}
+
+func decodeRegisterTokenRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	var req AuthenticateRequest
+	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
+		return nil, e
+	}
+	return req, nil
 }
 
 func decodeAuthenticateRequest(_ context.Context, r *http.Request) (request interface{}, err error) {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/kingcobra2468/ucrs/internal/device"
+	"github.com/kingcobra2468/ucrs/internal/registry"
 )
 
 func main() {
@@ -25,14 +26,15 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	var ds device.DeviceService
-	{
-	}
+	done := make(chan bool)
+	registry.Connect("10.0.1.10:6389")
+	registry.StartTokenExpirationListener(done, func(token string) {
+		fmt.Printf("Token: %s\n", token)
+	})
 
-	var h http.Handler
-	{
-		h = device.MakeHTTPHandler(ds)
-	}
+	var ds device.DeviceService
+
+	var h http.Handler = device.MakeHTTPHandler(ds)
 
 	errs := make(chan error)
 	go func() {
