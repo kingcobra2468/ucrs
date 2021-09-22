@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-type OnTokenExpiration func(token string)
+type OnTokenExpiration func(token string) error
 
 func StartTokenExpirationListener(done <-chan bool, ote OnTokenExpiration) error {
 	pubsub := cache.rdb.PSubscribe("__keyevent@0__:expired")

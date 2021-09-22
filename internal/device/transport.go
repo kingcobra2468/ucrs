@@ -22,8 +22,8 @@ func MakeHTTPHandler(ds DeviceService) http.Handler {
 		encodeResponse,
 	))
 
-	r.Methods("POST").Path("/api/auth").Handler(httptransport.NewServer(
-		MakeAuthenticateEndpoint(ds),
+	r.Methods("POST").Path("/api/register-token").Handler(httptransport.NewServer(
+		MakeRegisterTokenEndpoint(ds),
 		decodeRegisterTokenRequest,
 		encodeResponse,
 	))
@@ -32,7 +32,7 @@ func MakeHTTPHandler(ds DeviceService) http.Handler {
 }
 
 func decodeRegisterTokenRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
-	var req AuthenticateRequest
+	var req RegisterTokenRequest
 	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
 		return nil, e
 	}
@@ -40,7 +40,7 @@ func decodeRegisterTokenRequest(_ context.Context, r *http.Request) (request int
 }
 
 func decodeAuthenticateRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
-	var req AuthenticateRequest
+	var req RegisterTokenRequest
 	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
 		return nil, e
 	}

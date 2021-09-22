@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/kingcobra2468/ucrs/internal/device"
+	"github.com/kingcobra2468/ucrs/internal/notification"
 	"github.com/kingcobra2468/ucrs/internal/registry"
 )
 
@@ -25,14 +27,18 @@ func main() {
 		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
+	notification.ConnectFcm(context.Background())
 
 	done := make(chan bool)
 	registry.Connect("10.0.1.10:6389")
-	registry.StartTokenExpirationListener(done, func(token string) {
-		fmt.Printf("Token: %s\n", token)
+	registry.StartTokenExpirationListener(done, func(token string) error {
+		fmt.Printf("UnSubscribing Token: %s\n", token)
+		notification.RemoveRT(context.Background(), token)
+
+		return nil
 	})
 
-	var ds device.DeviceService
+	var ds device.DeviceService = device.Device{}
 
 	var h http.Handler = device.MakeHTTPHandler(ds)
 
