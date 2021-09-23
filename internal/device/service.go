@@ -13,10 +13,13 @@ type DeviceService interface {
 	RegisterToken(string) (bool, error)
 }
 
-type Device struct{}
+type Device struct {
+	Ds *notification.DeviceSubscriber
+	Dr *registry.DatabaseRegistry
+}
 
 var (
-	ErrAuthInvalid = errors.New("failued to authenticate")
+	ErrAuthInvalid = errors.New("failed to authenticate")
 )
 
 func (d Device) Authenticate(secret string) (bool, error) {
@@ -24,8 +27,8 @@ func (d Device) Authenticate(secret string) (bool, error) {
 }
 
 func (d Device) RegisterToken(token string) (bool, error) {
-	registry.AddRegistrationToken(token)
-	notification.AddRT(context.Background(), token)
+	d.Dr.AddRegistrationToken(token)
+	d.Ds.AddRT(context.Background(), token)
 
 	return true, nil
 }

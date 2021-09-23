@@ -17,13 +17,13 @@ func MakeHTTPHandler(ds DeviceService) http.Handler {
 	r := mux.NewRouter()
 
 	r.Methods("POST").Path("/api/auth").Handler(httptransport.NewServer(
-		MakeAuthenticateEndpoint(ds),
+		makeAuthenticateEndpoint(ds),
 		decodeAuthenticateRequest,
 		encodeResponse,
 	))
 
 	r.Methods("POST").Path("/api/register-token").Handler(httptransport.NewServer(
-		MakeRegisterTokenEndpoint(ds),
+		makeRegisterTokenEndpoint(ds),
 		decodeRegisterTokenRequest,
 		encodeResponse,
 	))

@@ -6,14 +6,18 @@ import (
 	"github.com/go-redis/redis"
 )
 
-type registryTokenCache struct {
+type Registry interface {
+	Connect(addr string)
+	AddRegistrationToken(token string) error
+	StartTokenExpirationListener(done <-chan bool, ote OnTokenExpiration) error
+}
+
+type DatabaseRegistry struct {
 	rdb *redis.Client
 }
 
-var cache *registryTokenCache
-
-func Connect(addr string) {
-	if cache != nil {
+func (dr *DatabaseRegistry) Connect(addr string) {
+	if dr.rdb != nil {
 		return
 	}
 	client := redis.NewClient(&redis.Options{
@@ -22,11 +26,11 @@ func Connect(addr string) {
 		DB:       0,
 	})
 
-	cache = &registryTokenCache{rdb: client}
+	dr.rdb = client
 }
 
-func AddRegistrationToken(token string) error {
-	err := cache.rdb.Set(token, token, time.Hour*48).Err()
+func (dr *DatabaseRegistry) AddRegistrationToken(token string) error {
+	err := dr.rdb.Set(token, token, time.Hour*48).Err()
 
 	return err
 }

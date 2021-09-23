@@ -25,7 +25,7 @@ type RegisterTokenResponse struct {
 	Error   error `json:"error,omitempty"`
 }
 
-func MakeAuthenticateEndpoint(ds DeviceService) endpoint.Endpoint {
+func makeAuthenticateEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(AuthenticateRequest)
 		fmt.Print(req)
@@ -34,10 +34,9 @@ func MakeAuthenticateEndpoint(ds DeviceService) endpoint.Endpoint {
 	}
 }
 
-func MakeRegisterTokenEndpoint(ds DeviceService) endpoint.Endpoint {
+func makeRegisterTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(RegisterTokenRequest)
-		fmt.Println(req)
 		ds.RegisterToken(req.RegistrationToken)
 
 		return RegisterTokenResponse{true, ErrAuthInvalid}, nil
