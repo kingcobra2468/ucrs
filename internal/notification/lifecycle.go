@@ -8,12 +8,16 @@ import (
 	"firebase.google.com/go/messaging"
 )
 
+// Handle for Google FCM. Managing the lifecycle of
+// adding and removing registration tokens from the "un" topic
+// that is used for broadcasting notifcations.
 type Subscription interface {
 	Connect(ctx context.Context) error
 	AddRT(ctx context.Context, token string) error
 	RemoveRT(ctx context.Context, token string) error
 }
 
+// Client for registration token lifecycle.
 type DeviceSubscriber struct {
 	client *messaging.Client
 }
@@ -22,6 +26,7 @@ var (
 	ErrNotConnected = errors.New("client not connected")
 )
 
+// Connect to Google's FCM.
 func (ds *DeviceSubscriber) Connect(ctx context.Context) error {
 	app, err := firebase.NewApp(ctx, nil)
 	if err != nil {
@@ -36,6 +41,7 @@ func (ds *DeviceSubscriber) Connect(ctx context.Context) error {
 	return nil
 }
 
+// Add registration token to the "un" topic.
 func (ds *DeviceSubscriber) AddRT(ctx context.Context, token string) error {
 	if ds.client == nil {
 		return ErrNotConnected
@@ -45,7 +51,7 @@ func (ds *DeviceSubscriber) AddRT(ctx context.Context, token string) error {
 	if err != nil {
 		return err
 	}
-
+	// Check if FCM didn't return any failures which indicates succcess.
 	if response.FailureCount == 0 {
 		return nil
 	}
@@ -53,6 +59,7 @@ func (ds *DeviceSubscriber) AddRT(ctx context.Context, token string) error {
 	return errors.New(response.Errors[0].Reason)
 }
 
+// Remove registration token to the "un" topic.
 func (ds *DeviceSubscriber) RemoveRT(ctx context.Context, token string) error {
 	if ds.client == nil {
 		return ErrNotConnected
@@ -62,7 +69,7 @@ func (ds *DeviceSubscriber) RemoveRT(ctx context.Context, token string) error {
 	if err != nil {
 		return err
 	}
-
+	// Check if FCM didn't return any failures which indicates succcess.
 	if response.FailureCount == 0 {
 		return nil
 	}

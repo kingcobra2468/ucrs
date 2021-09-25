@@ -4,8 +4,10 @@ import (
 	"errors"
 )
 
+// Signature for creating callbacks for token expiration.
 type OnTokenExpiration func(token string) error
 
+// Listener for handling token expiration.
 func (dr *DatabaseRegistry) NewTokenExpirationListener(done <-chan bool, ote OnTokenExpiration) error {
 	pubsub := dr.rdb.PSubscribe("__keyevent@0__:expired")
 	_, err := pubsub.Receive()
@@ -15,15 +17,15 @@ func (dr *DatabaseRegistry) NewTokenExpirationListener(done <-chan bool, ote OnT
 
 	ch := pubsub.Channel()
 
-	// launch listener in a background thread
+	// Launch listener in a background thread.
 	go func() {
-		// operate on expired tokens without blocking
+		// Operate on expired tokens without blocking.
 		go func() {
 			for msg := range ch {
 				ote(msg.Payload)
 			}
 		}()
-
+		// Operate listener until terminal.
 		<-done
 		pubsub.Close()
 	}()

@@ -46,12 +46,13 @@ func main() {
 	var h http.Handler = device.MakeHTTPHandler(service)
 
 	errs := make(chan error)
+	// Listener for Ctrl+C signals.
 	go func() {
 		c := make(chan os.Signal)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 		errs <- fmt.Errorf("%s", <-c)
 	}()
-
+	// Launch microservice.
 	go func() {
 		logger.Log("transport", "HTTP", "addr", ":8080")
 		errs <- http.ListenAndServe(":8080", h)

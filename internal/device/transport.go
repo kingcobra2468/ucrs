@@ -9,10 +9,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Error handling.
 type errorer interface {
 	error() error
 }
 
+// Create the handling which managing the lifecycle of each of the
+// endpoints.
 func MakeHTTPHandler(ds DeviceService) http.Handler {
 	r := mux.NewRouter()
 
@@ -31,6 +34,7 @@ func MakeHTTPHandler(ds DeviceService) http.Handler {
 	return r
 }
 
+// Process the token registration request
 func decodeRegisterTokenRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
 	var req RegisterTokenRequest
 	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
@@ -39,6 +43,7 @@ func decodeRegisterTokenRequest(_ context.Context, r *http.Request) (request int
 	return req, nil
 }
 
+// Process the authentication request
 func decodeAuthenticateRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
 	var req RegisterTokenRequest
 	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
@@ -47,6 +52,7 @@ func decodeAuthenticateRequest(_ context.Context, r *http.Request) (request inte
 	return req, nil
 }
 
+// Handle the encoding of response data post endpoint logic.
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if e, ok := response.(errorer); ok && e.error() != nil {
 		// Not a Go kit transport error, but a business-logic error.
@@ -58,6 +64,7 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 	return json.NewEncoder(w).Encode(response)
 }
 
+// Handle for situations if an error exists.
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	if err == nil {
 		panic("encodeError with nil error")
@@ -69,6 +76,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	})
 }
 
+// Process error codes for responding with the correct status code.
 func codeFrom(err error) int {
 	switch err {
 	case ErrAuthInvalid:
