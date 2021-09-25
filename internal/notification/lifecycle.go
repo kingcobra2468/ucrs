@@ -9,7 +9,7 @@ import (
 )
 
 // Handle for Google FCM. Managing the lifecycle of
-// adding and removing registration tokens from the "un" topic
+// adding and removing registration tokens from the specified topic
 // that is used for broadcasting notifcations.
 type Subscription interface {
 	Connect(ctx context.Context) error
@@ -20,6 +20,7 @@ type Subscription interface {
 // Client for registration token lifecycle.
 type DeviceSubscriber struct {
 	client *messaging.Client
+	Topic  string
 }
 
 var (
@@ -41,13 +42,13 @@ func (ds *DeviceSubscriber) Connect(ctx context.Context) error {
 	return nil
 }
 
-// Add registration token to the "un" topic.
+// Add registration token to the specified topic.
 func (ds *DeviceSubscriber) AddRT(ctx context.Context, token string) error {
 	if ds.client == nil {
 		return ErrNotConnected
 	}
 
-	response, err := ds.client.SubscribeToTopic(ctx, []string{token}, "un")
+	response, err := ds.client.SubscribeToTopic(ctx, []string{token}, ds.Topic)
 	if err != nil {
 		return err
 	}
@@ -59,13 +60,13 @@ func (ds *DeviceSubscriber) AddRT(ctx context.Context, token string) error {
 	return errors.New(response.Errors[0].Reason)
 }
 
-// Remove registration token to the "un" topic.
+// Remove registration token to the specified topic.
 func (ds *DeviceSubscriber) RemoveRT(ctx context.Context, token string) error {
 	if ds.client == nil {
 		return ErrNotConnected
 	}
 
-	response, err := ds.client.UnsubscribeFromTopic(ctx, []string{token}, "un")
+	response, err := ds.client.UnsubscribeFromTopic(ctx, []string{token}, ds.Topic)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -15,6 +16,14 @@ import (
 )
 
 func main() {
+	hostname := flag.String("hostname", "0.0.0.0", "hostname for ucrs")
+	port := flag.Int("port", 8080, "port for ucrs")
+	redisHostname := flag.String("redis-hostname", "0.0.0.0", "hostname for redis cache")
+	redisPort := flag.Int("redis-port", 6379, "port for redis cache")
+	topic := flag.String("topic", "un", "fcm topic for registration token subscription")
+
+	flag.Parse()
+
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stdout)
@@ -22,14 +31,14 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	var ds notification.DeviceSubscriber = notification.DeviceSubscriber{}
+	var ds notification.DeviceSubscriber = notification.DeviceSubscriber{Topic: *topic}
 	{
 		ds.Connect(context.Background())
 	}
 
 	var dr registry.DatabaseRegistry = registry.DatabaseRegistry{}
 	{
-		dr.Connect("10.0.1.10:6389")
+		dr.Connect(fmt.Sprintf("%s:%d", *redisHostname, *redisPort))
 	}
 
 	done := make(chan bool)
@@ -54,8 +63,10 @@ func main() {
 	}()
 	// Launch microservice.
 	go func() {
-		logger.Log("transport", "HTTP", "addr", ":8080")
-		errs <- http.ListenAndServe(":8080", h)
+		url := fmt.Sprintf("%s:%d", *hostname, *port)
+
+		logger.Log("transport", "HTTP", "addr", url)
+		errs <- http.ListenAndServe(url, h)
 	}()
 
 	logger.Log("exit", <-errs)
