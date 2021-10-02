@@ -12,6 +12,8 @@ import (
 type DeviceService interface {
 	Authenticate(string) (bool, error)
 	RegisterToken(string) (bool, error)
+	RefreshTokenTTL(string) (bool, error)
+	UpdateToken(string, string) (bool, error)
 }
 
 // Device for managing clients to FCM and Redis.
@@ -36,5 +38,13 @@ func (d Device) RegisterToken(token string) (bool, error) {
 	d.Dr.AddRegistrationToken(token)
 	d.Ds.AddRT(context.Background(), token)
 
+	return true, nil
+}
+
+func (d Device) RefreshTokenTTL(token string) (bool, error) {
+	return true, nil
+}
+
+func (d Device) UpdateToken(newToken, oldToken string) (bool, error) {
 	return true, nil
 }
