@@ -38,7 +38,7 @@ func (lm LoggingMiddleware) RegisterToken(token string) (bool, error) {
 	return status, err
 }
 
-// Logging wrapper for token alive check.
+// Logging wrapper for token heartbeat check.
 func (lm LoggingMiddleware) RefreshTokenTTL(token string) (bool, error) {
 	defer func(begin time.Time) {
 		lm.Logger.Log(

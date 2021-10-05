@@ -64,7 +64,7 @@ func makeAuthenticateEndpoint(ds DeviceService) endpoint.Endpoint {
 }
 
 // Endpoint for token registration. Cache the token and add it to
-// the "un" topic.
+// the specified topic.
 func makeRegisterTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(RegisterTokenRequest)
@@ -74,6 +74,7 @@ func makeRegisterTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 	}
 }
 
+// Endpoint for refreshing the decay TTL to its original decay value.
 func makeRefreshTokenTTLEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(RefreshTokenTTLRequest)
@@ -83,6 +84,7 @@ func makeRefreshTokenTTLEndpoint(ds DeviceService) endpoint.Endpoint {
 	}
 }
 
+// Endpoint for updating an old token with its new counterpart given the FCM client.
 func makeUpdateTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateTokenRequest)

@@ -37,13 +37,13 @@ func MakeHTTPHandler(ds DeviceService) http.Handler {
 		encodeResponse,
 	))
 
-	r.Methods("PUT").Path("/token/alive/{rt}").Handler(httptransport.NewServer(
+	r.Methods("PUT").Path("/token/{rt}/heartbeat").Handler(httptransport.NewServer(
 		makeRefreshTokenTTLEndpoint(ds),
 		decodeRefreshTokenTTLRequest,
 		encodeResponse,
 	))
 
-	r.Methods("PUT").Path("/token/expired/{rt}").Handler(httptransport.NewServer(
+	r.Methods("PUT").Path("/token/{rt}/update-rt").Handler(httptransport.NewServer(
 		makeUpdateTokenEndpoint(ds),
 		decodeUpdateTokenEndpoint,
 		encodeResponse,
@@ -128,7 +128,7 @@ func codeFrom(err error) int {
 	switch err {
 	case ErrAuthInvalid:
 		return http.StatusUnauthorized
-	case ErrBadRequest:
+	case ErrBadRequest, ErrBadRequest:
 		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
