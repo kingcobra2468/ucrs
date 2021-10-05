@@ -17,6 +17,17 @@ type RegisterTokenRequest struct {
 	RegistrationToken string `json:"registration_token"`
 }
 
+// Schema of JSON object of token alive request
+type RefreshTokenTTLRequest struct {
+	RegistrationToken string `json:"registration_token"`
+}
+
+// Schema of JSON object of token update request
+type UpdateTokenRequest struct {
+	OldToken string `json:"old_token"`
+	NewToken string `json:"new_token"`
+}
+
 // Schema of JSON object for authentication response
 type AuthenticateResponse struct {
 	Success bool  `json:"success"`
@@ -25,6 +36,18 @@ type AuthenticateResponse struct {
 
 // Schema of JSON object of token registration response
 type RegisterTokenResponse struct {
+	Success bool  `json:"success"`
+	Error   error `json:"error,omitempty"`
+}
+
+// Schema of JSON object of token registration response
+type RefreshTokenTTLResponse struct {
+	Success bool  `json:"success"`
+	Error   error `json:"error,omitempty"`
+}
+
+// Schema of JSON object of token registration response
+type UpdateTokenResponse struct {
 	Success bool  `json:"success"`
 	Error   error `json:"error,omitempty"`
 }
@@ -41,11 +64,31 @@ func makeAuthenticateEndpoint(ds DeviceService) endpoint.Endpoint {
 }
 
 // Endpoint for token registration. Cache the token and add it to
-// the "un" topic.
+// the specified topic.
 func makeRegisterTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(RegisterTokenRequest)
 		ds.RegisterToken(req.RegistrationToken)
+
+		return RegisterTokenResponse{true, ErrAuthInvalid}, nil
+	}
+}
+
+// Endpoint for refreshing the decay TTL to its original decay value.
+func makeRefreshTokenTTLEndpoint(ds DeviceService) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(RefreshTokenTTLRequest)
+		ds.RefreshTokenTTL(req.RegistrationToken)
+
+		return RegisterTokenResponse{true, ErrAuthInvalid}, nil
+	}
+}
+
+// Endpoint for updating an old token with its new counterpart given the FCM client.
+func makeUpdateTokenEndpoint(ds DeviceService) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(UpdateTokenRequest)
+		ds.UpdateToken(req.NewToken, req.OldToken)
 
 		return RegisterTokenResponse{true, ErrAuthInvalid}, nil
 	}

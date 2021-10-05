@@ -37,3 +37,29 @@ func (lm LoggingMiddleware) RegisterToken(token string) (bool, error) {
 	status, err := lm.Next.RegisterToken(token)
 	return status, err
 }
+
+// Logging wrapper for token heartbeat check.
+func (lm LoggingMiddleware) RefreshTokenTTL(token string) (bool, error) {
+	defer func(begin time.Time) {
+		lm.Logger.Log(
+			"method", "registertoken",
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+
+	status, err := lm.Next.RefreshTokenTTL(token)
+	return status, err
+}
+
+// Logging wrapper for token expiration reset logic.
+func (lm LoggingMiddleware) UpdateToken(newToken, oldToken string) (bool, error) {
+	defer func(begin time.Time) {
+		lm.Logger.Log(
+			"method", "registertoken",
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+
+	status, err := lm.Next.UpdateToken(newToken, oldToken)
+	return status, err
+}

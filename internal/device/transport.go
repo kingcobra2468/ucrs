@@ -3,10 +3,16 @@ package device
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+)
+
+var (
+	ErrBadRouting = errors.New("inconsistent mapping between route and handler (programmer error)")
+	ErrBadRequest = errors.New("unable to process request")
 )
 
 // Error handling.
@@ -19,35 +25,76 @@ type errorer interface {
 func MakeHTTPHandler(ds DeviceService) http.Handler {
 	r := mux.NewRouter()
 
-	r.Methods("POST").Path("/api/auth").Handler(httptransport.NewServer(
+	r.Methods("POST").Path("/auth").Handler(httptransport.NewServer(
 		makeAuthenticateEndpoint(ds),
 		decodeAuthenticateRequest,
 		encodeResponse,
 	))
 
-	r.Methods("POST").Path("/api/register-token").Handler(httptransport.NewServer(
+	r.Methods("POST").Path("/token/register").Handler(httptransport.NewServer(
 		makeRegisterTokenEndpoint(ds),
 		decodeRegisterTokenRequest,
+		encodeResponse,
+	))
+
+	r.Methods("PUT").Path("/token/{rt}/heartbeat").Handler(httptransport.NewServer(
+		makeRefreshTokenTTLEndpoint(ds),
+		decodeRefreshTokenTTLRequest,
+		encodeResponse,
+	))
+
+	r.Methods("PUT").Path("/token/{rt}/update-rt").Handler(httptransport.NewServer(
+		makeUpdateTokenEndpoint(ds),
+		decodeUpdateTokenEndpoint,
 		encodeResponse,
 	))
 
 	return r
 }
 
-// Process the token registration request
+// Process the token registration request.
 func decodeRegisterTokenRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
 	var req RegisterTokenRequest
 	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
-		return nil, e
+		return nil, ErrBadRequest
 	}
 	return req, nil
 }
 
-// Process the authentication request
+// Process the token registration alive TTL reset request.
+func decodeRefreshTokenTTLRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	vars := mux.Vars(r)
+	rt, ok := vars["rt"]
+	if !ok {
+		return nil, ErrBadRouting
+	}
+
+	return RefreshTokenTTLRequest{RegistrationToken: rt}, nil
+}
+
+// Process the token registration expiration reset request.
+func decodeUpdateTokenEndpoint(_ context.Context, r *http.Request) (request interface{}, err error) {
+	var req UpdateTokenRequest
+	vars := mux.Vars(r)
+
+	rt, ok := vars["rt"]
+	if !ok {
+		return nil, ErrBadRouting
+	}
+
+	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
+		return nil, ErrBadRequest
+	}
+	req.OldToken = rt
+
+	return req, nil
+}
+
+// Process the authentication request.
 func decodeAuthenticateRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
 	var req RegisterTokenRequest
 	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
-		return nil, e
+		return nil, ErrBadRequest
 	}
 	return req, nil
 }
@@ -81,6 +128,8 @@ func codeFrom(err error) int {
 	switch err {
 	case ErrAuthInvalid:
 		return http.StatusUnauthorized
+	case ErrBadRequest, ErrBadRequest:
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}

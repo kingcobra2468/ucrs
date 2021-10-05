@@ -13,7 +13,8 @@ to this JSON file must be passed to the **GOOGLE_APPLICATION_CREDENTIALS** envir
 
 ### **Redis**
 Redis must be setup and running as it will be used for caching registration tokens along with TTL
-attribute to check for their staleness.
+attribute to check for their staleness. Tokens that are found to be stale will be automatically removed
+from the specified FCM topic.
 
 ## **Flags**
 The following flags are configurable when launching UCRS:
@@ -27,6 +28,19 @@ The following flags are configurable when launching UCRS:
 UCRS functions by attaching all devices to topic specified by the **--topic** flag. By default,
 the topic will be "un" which stands for universal notification. Regardless, when sending
 notifications, ensure that notifications are being sent to the correct topic.
+
+
+## **Endpoints**
+The following REST endpoints are available:
+- `/auth` **[POST]** - Authenticate into UCRS. This endpoint is currently a placeholder.
+- `/token/register` **[POST]** Register a FCM Registration token with UCRS. Token is given a
+TTL decay value and is put into the FCM topic.
+- `/token/{rt}/heartbeat` **[PUT]** - Heartbeat event takes place given the registration token passed via
+the placeholder `{rt}`. This resets the TTL of the token within the registry.
+- `/token/{rt}/update-rt` **[PUT]** - Update event takes place given the registration token passed via
+the placeholder `{rt}`. The token specified by `{rt}` is removed from the registry and the FCM topic, and
+the `new_token` is instead put into the registry and added to the FCM topic.
+ 
 
 ## Setup
 1. Install Golang(1.16) onto the machine.
