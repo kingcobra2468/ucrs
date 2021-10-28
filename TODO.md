@@ -1,4 +1,2 @@
 # UCRS TODO
-
-## API
-- Setup the authentication endpoint
+- add Docker support

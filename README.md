@@ -32,7 +32,6 @@ notifications, ensure that notifications are being sent to the correct topic.
 
 ## **Endpoints**
 The following REST endpoints are available:
-- `/auth` **[POST]** - Authenticate into UCRS. This endpoint is currently a placeholder.
 - `/token/register` **[POST]** Register a FCM Registration token with UCRS. Token is given a
 TTL decay value and is put into the FCM topic.
 - `/token/{rt}/heartbeat` **[PUT]** - Heartbeat event takes place given the registration token passed via

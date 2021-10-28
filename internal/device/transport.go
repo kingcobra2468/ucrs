@@ -25,12 +25,6 @@ type errorer interface {
 func MakeHTTPHandler(ds DeviceService) http.Handler {
 	r := mux.NewRouter()
 
-	r.Methods("POST").Path("/auth").Handler(httptransport.NewServer(
-		makeAuthenticateEndpoint(ds),
-		decodeAuthenticateRequest,
-		encodeResponse,
-	))
-
 	r.Methods("POST").Path("/token/register").Handler(httptransport.NewServer(
 		makeRegisterTokenEndpoint(ds),
 		decodeRegisterTokenRequest,
@@ -90,15 +84,6 @@ func decodeUpdateTokenEndpoint(_ context.Context, r *http.Request) (request inte
 	return req, nil
 }
 
-// Process the authentication request.
-func decodeAuthenticateRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
-	var req RegisterTokenRequest
-	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
-		return nil, ErrBadRequest
-	}
-	return req, nil
-}
-
 // Handle the encoding of response data post endpoint logic.
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if e, ok := response.(errorer); ok && e.error() != nil {
@@ -126,8 +111,6 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 // Process error codes for responding with the correct status code.
 func codeFrom(err error) int {
 	switch err {
-	case ErrAuthInvalid:
-		return http.StatusUnauthorized
 	case ErrBadRequest, ErrBadRequest:
 		return http.StatusBadRequest
 	default:
