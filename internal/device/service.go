@@ -10,7 +10,6 @@ import (
 
 // Service representing ucrs microservice.
 type DeviceService interface {
-	Authenticate(string) (bool, error)
 	RegisterToken(string) (bool, error)
 	RefreshTokenTTL(string) (bool, error)
 	UpdateToken(string, string) (bool, error)
@@ -23,15 +22,8 @@ type Device struct {
 }
 
 var (
-	ErrAuthInvalid    = errors.New("failed to authenticate")
 	ErrTokenLifecycle = errors.New("unable to change lifecycle for the registration token")
 )
-
-// Authenticate device prior to adding its registration token to
-// the FCM.
-func (d Device) Authenticate(secret string) (bool, error) {
-	return true, nil
-}
 
 // Add the registration token to a cache (which monitors for for stale tokens)
 // and add it the "un" topic for recieving notifications.
