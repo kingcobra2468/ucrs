@@ -16,13 +16,13 @@ Redis must be setup and running as it will be used for caching registration toke
 attribute to check for their staleness. Tokens that are found to be stale will be automatically removed
 from the specified FCM topic.
 
-## **Flags**
-The following flags are configurable when launching UCRS:
-- **--hostname (string)=** hostname for ucrs (default "0.0.0.0")
-- **--port (int)=** port for ucrs (default 8080)
-- **--redis-hostname (string)=** hostname for redis cache (default "0.0.0.0")
-- **--redis-port (int)=** port for redis cache (default "0.0.0.0")
-- **--topic (string)=** fcm topic for registration token subscription (default "un")
+### **Environemnt Setup**
+The following environment variables are configurable when launching UCRS:
+- **UCRS_HOSTNAME (string)=** hostname for ucrs (default "127.0.0.1")
+- **UCRS_PORT (int)=** port for ucrs (default 8080)
+- **UCRS_REDIS_HOSTNAME (string)=** hostname for redis cache (default "127.0.0.1")
+- **UCRS_REDIS_PORT (int)=** port for redis cache (default 6379)
+- **UCRS_FCM_TOPIC (string)=** fcm topic for registration token subscription (default "un")
 
 ## **Topic**
 UCRS functions by attaching all devices to topic specified by the **--topic** flag. By default,

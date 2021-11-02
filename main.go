@@ -2,27 +2,32 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/caarlos0/env"
 	"github.com/go-kit/kit/log"
 	"github.com/kingcobra2468/ucrs/internal/device"
 	"github.com/kingcobra2468/ucrs/internal/notification"
 	"github.com/kingcobra2468/ucrs/internal/registry"
 )
 
-func main() {
-	hostname := flag.String("hostname", "0.0.0.0", "hostname for ucrs")
-	port := flag.Int("port", 8080, "port for ucrs")
-	redisHostname := flag.String("redis-hostname", "0.0.0.0", "hostname for redis cache")
-	redisPort := flag.Int("redis-port", 6379, "port for redis cache")
-	topic := flag.String("topic", "un", "fcm topic for registration token subscription")
+type config struct {
+	ServiceHostname string `env:"UCRS_HOSTNAME" envDefault:"127.0.0.1"`
+	ServicePort     int    `env:"UCRS_PORT" envDefault:"8080"`
+	redisHostname   string `env:"UCRS_REDIS_HOSTNAME" envDefault:"127.0.0.1"`
+	redisPort       int    `env:"UCRS_REDIS_PORT" envDefault:"8080"`
+	FcmTopic        string `env:"UCRS_FCM_TOPIC" envDefault:"un"`
+}
 
-	flag.Parse()
+func main() {
+	cfg := config{}
+	if err := env.Parse(&cfg); err != nil {
+		panic(fmt.Sprintf("%+v\n", err))
+	}
 
 	var logger log.Logger
 	{
@@ -31,14 +36,14 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	var ds notification.DeviceSubscriber = notification.DeviceSubscriber{Topic: *topic}
+	var ds notification.DeviceSubscriber = notification.DeviceSubscriber{Topic: cfg.FcmTopic}
 	{
 		ds.Connect(context.Background())
 	}
 
 	var dr registry.DatabaseRegistry = registry.DatabaseRegistry{}
 	{
-		dr.Connect(fmt.Sprintf("%s:%d", *redisHostname, *redisPort))
+		dr.Connect(fmt.Sprintf("%s:%d", cfg.redisHostname, cfg.redisPort))
 	}
 
 	done := make(chan bool)
@@ -63,7 +68,7 @@ func main() {
 	}()
 	// Launch microservice.
 	go func() {
-		url := fmt.Sprintf("%s:%d", *hostname, *port)
+		url := fmt.Sprintf("%s:%d", cfg.ServiceHostname, cfg.ServicePort)
 
 		logger.Log("transport", "HTTP", "addr", url)
 		errs <- http.ListenAndServe(url, h)
