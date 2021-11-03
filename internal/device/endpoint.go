@@ -51,7 +51,11 @@ type UpdateTokenResponse struct {
 func makeRegisterTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(RegisterTokenRequest)
-		ds.RegisterToken(req.RegistrationToken)
+		_, err := ds.RegisterToken(req.RegistrationToken)
+
+		if err != nil {
+			return RegisterTokenResponse{false, err}, nil
+		}
 
 		return RegisterTokenResponse{true, nil}, nil
 	}
