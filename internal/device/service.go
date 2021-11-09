@@ -32,8 +32,7 @@ func (d Device) RegisterToken(token string) (bool, error) {
 	if err != nil {
 		return false, ErrTokenLifecycle
 	}
-
-	d.Ds.AddRT(context.Background(), token)
+	err = d.Ds.AddRT(context.Background(), token)
 	if err != nil {
 		return false, ErrTokenLifecycle
 	}

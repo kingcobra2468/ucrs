@@ -51,7 +51,11 @@ type UpdateTokenResponse struct {
 func makeRegisterTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(RegisterTokenRequest)
-		ds.RegisterToken(req.RegistrationToken)
+		_, err := ds.RegisterToken(req.RegistrationToken)
+
+		if err != nil {
+			return RegisterTokenResponse{false, err}, nil
+		}
 
 		return RegisterTokenResponse{true, nil}, nil
 	}
@@ -61,7 +65,11 @@ func makeRegisterTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 func makeRefreshTokenTTLEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(RefreshTokenTTLRequest)
-		ds.RefreshTokenTTL(req.RegistrationToken)
+		_, err := ds.RefreshTokenTTL(req.RegistrationToken)
+
+		if err != nil {
+			return RegisterTokenResponse{false, err}, nil
+		}
 
 		return RegisterTokenResponse{true, nil}, nil
 	}
@@ -71,7 +79,11 @@ func makeRefreshTokenTTLEndpoint(ds DeviceService) endpoint.Endpoint {
 func makeUpdateTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateTokenRequest)
-		ds.UpdateToken(req.NewToken, req.OldToken)
+		_, err := ds.UpdateToken(req.NewToken, req.OldToken)
+
+		if err != nil {
+			return RegisterTokenResponse{false, err}, nil
+		}
 
 		return RegisterTokenResponse{true, nil}, nil
 	}

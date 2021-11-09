@@ -38,7 +38,9 @@ func main() {
 
 	var ds notification.DeviceSubscriber = notification.DeviceSubscriber{Topic: cfg.FcmTopic}
 	{
-		ds.Connect(context.Background())
+		if err := ds.Connect(context.Background()); err != nil {
+			panic(err)
+		}
 	}
 
 	var dr registry.DatabaseRegistry = registry.DatabaseRegistry{}
