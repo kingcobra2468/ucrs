@@ -18,8 +18,8 @@ import (
 type config struct {
 	ServiceHostname string `env:"UCRS_HOSTNAME" envDefault:"127.0.0.1"`
 	ServicePort     int    `env:"UCRS_PORT" envDefault:"8080"`
-	redisHostname   string `env:"UCRS_REDIS_HOSTNAME" envDefault:"127.0.0.1"`
-	redisPort       int    `env:"UCRS_REDIS_PORT" envDefault:"8080"`
+	RedisHostname   string `env:"UCRS_REDIS_HOSTNAME" envDefault:"127.0.0.1"`
+	RedisPort       int    `env:"UCRS_REDIS_PORT" envDefault:"8080"`
 	FcmTopic        string `env:"UCRS_FCM_TOPIC" envDefault:"un"`
 }
 
@@ -38,12 +38,14 @@ func main() {
 
 	var ds notification.DeviceSubscriber = notification.DeviceSubscriber{Topic: cfg.FcmTopic}
 	{
-		ds.Connect(context.Background())
+		if err := ds.Connect(context.Background()); err != nil {
+			panic(err)
+		}
 	}
 
 	var dr registry.DatabaseRegistry = registry.DatabaseRegistry{}
 	{
-		dr.Connect(fmt.Sprintf("%s:%d", cfg.redisHostname, cfg.redisPort))
+		dr.Connect(fmt.Sprintf("%s:%d", cfg.RedisHostname, cfg.RedisPort))
 	}
 
 	done := make(chan bool)

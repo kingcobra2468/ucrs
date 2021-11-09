@@ -52,6 +52,7 @@ func (ds *DeviceSubscriber) AddRT(ctx context.Context, token string) error {
 	if err != nil {
 		return err
 	}
+
 	// Check if FCM didn't return any failures which indicates succcess.
 	if response.FailureCount == 0 {
 		return nil
