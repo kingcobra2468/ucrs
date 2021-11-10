@@ -22,12 +22,6 @@ type UpdateTokenRequest struct {
 	NewToken string `json:"new_token"`
 }
 
-// Schema of JSON object for authentication response
-type AuthenticateResponse struct {
-	Success bool  `json:"success"`
-	Error   error `json:"error,omitempty"`
-}
-
 // Schema of JSON object of token registration response
 type RegisterTokenResponse struct {
 	Success bool  `json:"success"`
