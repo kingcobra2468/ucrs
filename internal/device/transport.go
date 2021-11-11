@@ -43,6 +43,12 @@ func MakeHTTPHandler(ds DeviceService) http.Handler {
 		encodeResponse,
 	))
 
+	r.Methods("GET").Path("/ping").Handler(httptransport.NewServer(
+		makPingEndpoint(ds),
+		decodePingRequest,
+		encodeResponse,
+	))
+
 	return r
 }
 
@@ -82,6 +88,11 @@ func decodeUpdateTokenEndpoint(_ context.Context, r *http.Request) (request inte
 	req.OldToken = rt
 
 	return req, nil
+}
+
+// Process the token registration request.
+func decodePingRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	return nil, nil
 }
 
 // Handle the encoding of response data post endpoint logic.

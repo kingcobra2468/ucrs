@@ -22,12 +22,6 @@ type UpdateTokenRequest struct {
 	NewToken string `json:"new_token"`
 }
 
-// Schema of JSON object for authentication response
-type AuthenticateResponse struct {
-	Success bool  `json:"success"`
-	Error   error `json:"error,omitempty"`
-}
-
 // Schema of JSON object of token registration response
 type RegisterTokenResponse struct {
 	Success bool  `json:"success"`
@@ -44,6 +38,12 @@ type RefreshTokenTTLResponse struct {
 type UpdateTokenResponse struct {
 	Success bool  `json:"success"`
 	Error   error `json:"error,omitempty"`
+}
+
+// Schema of JSON object of ping response
+type PingResponse struct {
+	Message string `json:"message"`
+	Error   error  `json:"error,omitempty"`
 }
 
 // Endpoint for token registration. Cache the token and add it to
@@ -86,5 +86,12 @@ func makeUpdateTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 		}
 
 		return RegisterTokenResponse{true, nil}, nil
+	}
+}
+
+// Endpoint for checking is service is alive.
+func makPingEndpoint(ds DeviceService) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		return PingResponse{"pong", nil}, nil
 	}
 }
