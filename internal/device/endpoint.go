@@ -40,6 +40,12 @@ type UpdateTokenResponse struct {
 	Error   error `json:"error,omitempty"`
 }
 
+// Schema of JSON object of ping response
+type PingResponse struct {
+	Message string `json:"message"`
+	Error   error  `json:"error,omitempty"`
+}
+
 // Endpoint for token registration. Cache the token and add it to
 // the specified topic.
 func makeRegisterTokenEndpoint(ds DeviceService) endpoint.Endpoint {
@@ -80,5 +86,12 @@ func makeUpdateTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 		}
 
 		return RegisterTokenResponse{true, nil}, nil
+	}
+}
+
+// Endpoint for checking is service is alive.
+func makPingEndpoint(ds DeviceService) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		return PingResponse{"pong", nil}, nil
 	}
 }
