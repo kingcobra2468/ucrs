@@ -29,7 +29,7 @@ func (lm LoggingMiddleware) RegisterToken(token string) (bool, error) {
 func (lm LoggingMiddleware) RefreshTokenTTL(token string) (bool, error) {
 	defer func(begin time.Time) {
 		lm.Logger.Log(
-			"method", "registertoken",
+			"method", "refreshtokenttl",
 			"took", time.Since(begin),
 		)
 	}(time.Now())
@@ -42,7 +42,7 @@ func (lm LoggingMiddleware) RefreshTokenTTL(token string) (bool, error) {
 func (lm LoggingMiddleware) UpdateToken(newToken, oldToken string) (bool, error) {
 	defer func(begin time.Time) {
 		lm.Logger.Log(
-			"method", "registertoken",
+			"method", "updatetoken",
 			"took", time.Since(begin),
 		)
 	}(time.Now())

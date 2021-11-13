@@ -25,25 +25,25 @@ type UpdateTokenRequest struct {
 // Schema of JSON object of token registration response
 type RegisterTokenResponse struct {
 	Success bool  `json:"success"`
-	Error   error `json:"error,omitempty"`
+	Error   error `json:"error"`
 }
 
 // Schema of JSON object of token registration response
 type RefreshTokenTTLResponse struct {
 	Success bool  `json:"success"`
-	Error   error `json:"error,omitempty"`
+	Error   error `json:"error"`
 }
 
 // Schema of JSON object of token registration response
 type UpdateTokenResponse struct {
 	Success bool  `json:"success"`
-	Error   error `json:"error,omitempty"`
+	Error   error `json:"error"`
 }
 
 // Schema of JSON object of ping response
 type PingResponse struct {
 	Message string `json:"message"`
-	Error   error  `json:"error,omitempty"`
+	Error   error  `json:"error"`
 }
 
 // Endpoint for token registration. Cache the token and add it to
@@ -68,10 +68,10 @@ func makeRefreshTokenTTLEndpoint(ds DeviceService) endpoint.Endpoint {
 		_, err := ds.RefreshTokenTTL(req.RegistrationToken)
 
 		if err != nil {
-			return RegisterTokenResponse{false, err}, nil
+			return RefreshTokenTTLResponse{false, err}, nil
 		}
 
-		return RegisterTokenResponse{true, nil}, nil
+		return RefreshTokenTTLResponse{true, nil}, nil
 	}
 }
 
@@ -82,10 +82,10 @@ func makeUpdateTokenEndpoint(ds DeviceService) endpoint.Endpoint {
 		_, err := ds.UpdateToken(req.NewToken, req.OldToken)
 
 		if err != nil {
-			return RegisterTokenResponse{false, err}, nil
+			return UpdateTokenResponse{false, err}, nil
 		}
 
-		return RegisterTokenResponse{true, nil}, nil
+		return UpdateTokenResponse{true, nil}, nil
 	}
 }
 
