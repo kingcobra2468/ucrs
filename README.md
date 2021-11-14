@@ -29,10 +29,9 @@ UCRS functions by attaching all devices to topic specified by the **UCRS_FCM_TOP
 the topic will be "un" which stands for universal notification. Regardless, when sending
 notifications, ensure that notifications are being sent to the correct topic.
 
-
 ## **Endpoints**
 The following REST endpoints are available:
-- `/ping` **[POST]** Ping pong styled endpoint for checking online status of UCRS.
+- `/ping` **[GET]** Ping pong styled endpoint for checking online status of UCRS.
 - `/token/register` **[POST]** Register a FCM Registration token with UCRS. Token is given a
 TTL decay value and is put into the FCM topic.
 - `/token/{rt}/heartbeat` **[PUT]** - Heartbeat event takes place given the registration token passed via
@@ -42,8 +41,23 @@ the placeholder `{rt}`. The token specified by `{rt}` is removed from the regist
 the `new_token` is instead put into the registry and added to the FCM topic.
  
 
-## Setup
+## **Setup**
+
+### **Bare-Metal**
 1. Install Golang(1.16) onto the machine.
 2. Setup Firebase and Redis as specified [here](#config).
 3. Build the application with `go build`.
 4. Launch the application with the appropriate flags via the `ucrs` binary.
+
+### **Docker**
+1. Build the container `docker build -t ucrs:1.0 .` . Note, the [environment setup](#environemnt-setup)
+options can be passed here as build args to make them built into
+the iamge. This can be useful for [GOOGLE_APPLICATION_CREDENTIALS](#firebase) since removes
+the need to pass it the firebase project config to all containers.
+2. If build-time setup isnt used, the image exposes the `/fcm` volume for passing
+firebase service file into the container. Likewise, environment variables for
+[environment setup](#environemnt-setup) would make use of standard docker `-e` flag.
+Example: 
+```bash
+docker run --name ucrs-1 --rm -v $PWD:/fcm -e UCRS_HOSTNAME=0.0.0.0 -e UCRS_PORT=8083 -e UCRS_REDIS_HOSTNAME=10.0.1.10 -e UCRS_REDIS_PORT=6389 -e GOOGLE_APPLICATION_CREDENTIALS=/fcm/upn-service-.json -p 8083:8083 -d ucrs:1.0
+```

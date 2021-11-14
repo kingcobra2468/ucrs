@@ -22,5 +22,6 @@ RUN go install -v ./...
 RUN go build
 
 EXPOSE ${ucrs_port}
+VOLUME /fcm
 
 CMD ["ucrs"]
